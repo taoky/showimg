@@ -9,3 +9,9 @@ Hint: Press Alt + Space to activate mutter window menu in GNOME. You can set the
 ```
 
 Picture will be shown with their natural size.
+
+## Screenshot
+
+![Screenshot 1 (fullscreen)](assets/screenshot1.png)
+
+![Screenshot 2 (With mutter window menu)](assets/screenshot2.png)
