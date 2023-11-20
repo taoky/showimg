@@ -1,7 +1,10 @@
 use clap::Parser;
-use gtk::{gdk, prelude::*, CssProvider, Picture, StyleContext, STYLE_PROVIDER_PRIORITY_APPLICATION};
-use gtk::{Application, ApplicationWindow};
 use gtk::gio::File;
+use gtk::{
+    gdk, prelude::*, style_context_add_provider_for_display, CssProvider, Picture,
+    STYLE_PROVIDER_PRIORITY_APPLICATION,
+};
+use gtk::{Application, ApplicationWindow};
 
 const APP_ID: &str = "org.taoky.showimg";
 const CSS: &str = ".background {
@@ -13,7 +16,7 @@ const CSS: &str = ".background {
 struct Args {
     // The image file to open
     #[clap(short, long, value_parser)]
-    file: String
+    file: String,
 }
 
 fn main() {
@@ -33,8 +36,8 @@ fn main() {
 fn build_ui(app: &Application, filename: &str) {
     // CSS style
     let css_provider = CssProvider::new();
-    css_provider.load_from_data(CSS.as_bytes());
-    StyleContext::add_provider_for_display(
+    css_provider.load_from_data(CSS);
+    style_context_add_provider_for_display(
         &gdk::Display::default().expect("Error initializing gdk default display"),
         &css_provider,
         STYLE_PROVIDER_PRIORITY_APPLICATION,
@@ -42,9 +45,7 @@ fn build_ui(app: &Application, filename: &str) {
 
     // Image
     let texture = gdk::Texture::from_file(&File::for_path(filename)).expect("Cannot open image");
-    let image = Picture::builder()
-        .paintable(&texture)
-        .build();
+    let image = Picture::builder().paintable(&texture).build();
 
     // Create a window
     let window = ApplicationWindow::builder()
@@ -55,6 +56,7 @@ fn build_ui(app: &Application, filename: &str) {
 
     window.set_decorated(false);
 
+    println!("Press Alt+Space to set window always on top");
     // Present window
     window.present();
 }
