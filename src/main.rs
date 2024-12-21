@@ -60,6 +60,20 @@ fn main() {
     app.run_with_args(&[""]);
 }
 
+fn message_dialog(title: &str, message: &str, parent: &impl IsA<gtk::Window>) {
+    gtk::glib::MainContext::default().block_on(async {
+        let dialog = gtk::MessageDialog::builder()
+            .message_type(gtk::MessageType::Error)
+            .text(title)
+            .secondary_text(message)
+            .buttons(gtk::ButtonsType::Close)
+            .transient_for(parent)
+            .modal(true)
+            .build();
+        dialog.run_future().await;
+    });
+}
+
 fn build_ui(app: &Application, args: &Args) {
     let window = window::Window::new(app, "Show Img", args.clone());
     let filename = match &args.file {
@@ -96,21 +110,22 @@ fn build_ui(app: &Application, args: &Args) {
     let texture = match gdk::Texture::from_file(&File::for_path(filename)) {
         Ok(t) => t,
         Err(e) => {
-            gtk::glib::MainContext::default().block_on(async {
-                let dialog = gtk::MessageDialog::builder()
-                    .message_type(gtk::MessageType::Error)
-                    .text("Failed to load image")
-                    .secondary_text(e.to_string())
-                    .buttons(gtk::ButtonsType::Close)
-                    .modal(true)
-                    .transient_for(&window)
-                    .build();
-                dialog.run_future().await;
-            });
+            message_dialog("Failed to load image", &e.to_string(), &window);
             std::process::exit(1);
         }
     };
-    let image = Picture::builder().paintable(&texture).build();
+    let image = Picture::builder()
+        .halign(gtk::Align::Center)
+        .valign(gtk::Align::Fill)
+        .paintable(&texture)
+        .build();
+    let image_height = texture.height();
+    let image_width = texture.width();
+    if image_height == 0 || image_width == 0 {
+        message_dialog("Failed to load image", "Image has zero size", &window);
+        std::process::exit(1);
+    }
+    window.set_ratio(image_width as f64 / image_height as f64);
 
     // CSS style
     let css_provider = CssProvider::new();
@@ -121,9 +136,8 @@ fn build_ui(app: &Application, args: &Args) {
         STYLE_PROVIDER_PRIORITY_APPLICATION,
     );
 
-    window.set_child(Some(&image));
-
     window.set_decorated(false);
+    window.set_child(Some(&image));
 
     if args.no_context_menu {
         println!("Hint: Press Alt+Space to set window always on top");

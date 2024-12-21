@@ -88,4 +88,8 @@ impl Window {
         window.set_title(Some(title));
         window
     }
+
+    pub fn set_ratio(&self, ratio: f64) {
+        self.imp().ratio.set(ratio);
+    }
 }
