@@ -2,15 +2,53 @@
 
 A very simple GTK program to show a picture without window decoration in Linux (supports transparent PNG files). Written in gtk-rs.
 
-Hint: Press Alt + Space to activate mutter window menu in GNOME. You can set the window to be "Always on Top" there.
+Hint: Right click or press Alt + Space to activate mutter window menu in GNOME. You can set the window to be "Always on Top" there.
+
+## Build
+
+### Cargo
+
+```shell
+cargo build --release
+```
+
+### Flatpak
+
+```shell
+flatpak-builder --install repo build-aux/moe.taoky.showimg.yaml --force-clean --user
+```
 
 ## Usage
 
 ```shell
-./showimg --file ./path/to/img
+./showimg ./path/to/img
 ```
 
-Picture will be shown with their natural size.
+```console
+$ ./showimg --help
+showimg 0.2.0
+Show a picture without window decoration in Linux desktop
+
+USAGE:
+    showimg [OPTIONS] [FILE]
+
+ARGS:
+    <FILE>    The image file to open. Empty value would open a file chooser dialog
+
+OPTIONS:
+    -h, --help                     Print help information
+    -m, --mouse <MOUSE>            Controls how window reacts to mouse events [default: none]
+                                   [possible values: none, drag, passthrough]
+        --no-context-menu          Disable right-click context menu
+        --no-maximize              Disable double-click to maximize
+    -q, --quit-with <QUIT_WITH>    The accelerator to quit the application, "none" to disable.
+                                   Syntax:
+                                   https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/fn.accelerator_parse.html
+                                   [default: q]
+    -V, --version                  Print version information
+```
+
+Picture will be shown with their natural size. You could resize the window manually.
 
 ## Screenshot
 
