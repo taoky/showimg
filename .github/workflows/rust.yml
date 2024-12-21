@@ -32,6 +32,12 @@ jobs:
         mkdir -p ~/.cargo/{git,registry}
         cargo build --release
         mv target/release/showimg showimg-amd64
+    - name: Build Flatpak Package
+      uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+      with:
+        bundle: moe.taoky.showimg.flatpak
+        manifest-path: build-aux/moe.taoky.showimg.yaml
+        cache-key: flatpak-builder-${{ github.sha }}
 
     - name: Deploy - Create and Upload Release
       if: startsWith(github.ref, 'refs/tags/')
@@ -39,6 +45,7 @@ jobs:
       with:
         artifacts: |
           showimg-amd64
+          moe.taoky.showimg.flatpak
     - name: Deploy - Put it in artifact (if not a tag)
       if: false == startsWith(github.ref, 'refs/tags/')
       uses: actions/upload-artifact@v4
@@ -46,3 +53,4 @@ jobs:
         name: showimg
         path: |
           showimg-amd64
+          moe.taoky.showimg.flatpak
