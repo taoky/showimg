@@ -6,6 +6,18 @@ Hint: Right click or press Alt + Space to activate mutter window menu in GNOME. 
 
 ## Build
 
+### Pre-build binaries & flatpak
+
+You can download pre-build binaries or flatpak bundle from GitHub Releases.
+
+The binary is compiled under Ubuntu 22.04, which shall work for all FHS-compliant distros after that, as long as you have installed GTK 4.4 or later.
+
+If you prefer flatpak, just install with:
+
+```shell
+flatpak install --user ./moe.taoky.showimg.flatpak
+```
+
 ### Cargo
 
 ```shell
