@@ -654,7 +654,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "showimg"
+name = "showimg-gtk"
 version = "0.2.0"
 dependencies = [
  "clap",

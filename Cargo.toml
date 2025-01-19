@@ -1,8 +1,14 @@
 [package]
-name = "showimg"
+name = "showimg-gtk"
 version = "0.2.0"
 edition = "2021"
 description = "Show a picture without window decoration in Linux desktop"
+exclude = ["assets/*", "build-aux/*", ".github/*", "libs/*", "repo/*", ".flatpak-builder/*"]
+readme = "README.md"
+license = "Unlicense"
+categories = ["graphics"]
+keywords = ["gtk", "desktop", "image", "picture"]
+repository = "https://github.com/taoky/showimg"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
