@@ -24,7 +24,7 @@ modules:
     build-commands:
       - cargo fetch --manifest-path Cargo.toml
       - cargo build --release
-      - install -Dm755 ./target/release/showimg -t /app/bin/
+      - install -Dm755 ./target/release/showimg-gtk /app/bin/showimg
     sources:
       - type: dir
         path: ../

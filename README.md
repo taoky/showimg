@@ -24,6 +24,12 @@ flatpak install --user ./moe.taoky.showimg.flatpak
 cargo build --release
 ```
 
+or
+
+```shell
+cargo install showimg-gtk
+```
+
 ### Flatpak
 
 ```shell
@@ -38,11 +44,11 @@ flatpak-builder --install repo build-aux/moe.taoky.showimg.yaml --force-clean --
 
 ```console
 $ ./showimg --help
-showimg 0.2.0
+showimg-gtk 0.2.0
 Show a picture without window decoration in Linux desktop
 
 USAGE:
-    showimg [OPTIONS] [FILE]
+    showimg-gtk [OPTIONS] [FILE]
 
 ARGS:
     <FILE>    The image file to open. Empty value would open a file chooser dialog
