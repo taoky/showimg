@@ -1,10 +1,15 @@
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use clap::{ArgEnum, Parser};
 use gtk::gio::File;
+use gtk::glib::g_warning;
 use gtk::Application;
 use gtk::{
     gdk, prelude::*, style_context_add_provider_for_display, CssProvider, FileChooserNative,
     Picture, STYLE_PROVIDER_PRIORITY_APPLICATION,
 };
+use anyhow::Result;
 
 mod window;
 
@@ -21,10 +26,19 @@ pub enum MouseBehavior {
     Passthrough,
 }
 
+#[derive(Clone, Copy, Debug, ArgEnum, PartialEq)]
+pub enum UseClipboard {
+    No,
+    Primary,
+    Yes,
+}
+
 #[derive(Parser, Debug, Clone)]
 #[clap(about, version)]
 pub struct Args {
-    /// The image file to open. Empty value would open a file chooser dialog
+    /// The image file to open. Empty value would open a file chooser dialog.
+    /// 
+    /// Supports PNG, JPEG and TIFF.
     #[clap(value_parser)]
     file: Option<String>,
 
@@ -34,7 +48,7 @@ pub struct Args {
     quit_with: String,
 
     /// Controls how window reacts to mouse events
-    #[clap(short, long, value_enum, default_value_t = MouseBehavior::None)]
+    #[clap(short, long, value_enum, default_value_t = MouseBehavior::Drag)]
     mouse: MouseBehavior,
 
     /// Disable right-click context menu
@@ -44,6 +58,9 @@ pub struct Args {
     /// Disable double-click to maximize
     #[clap(long)]
     no_maximize: bool,
+
+    #[clap(long, value_enum, default_value_t = UseClipboard::No)]
+    clipboard: UseClipboard,
 }
 
 fn main() {
@@ -74,40 +91,113 @@ fn message_dialog(title: &str, message: &str, parent: &impl IsA<gtk::Window>) {
     });
 }
 
-fn build_ui(app: &Application, args: &Args) {
-    let window = window::Window::new(app, "Show Img", args.clone());
-    let filename = match &args.file {
-        None => gtk::glib::MainContext::default().block_on(async {
-            let dialog = FileChooserNative::builder()
-                .title("Open Image")
-                .action(gtk::FileChooserAction::Open)
-                .modal(true)
-                .transient_for(&window)
-                .build();
-            let filename = if dialog.run_future().await == gtk::ResponseType::Accept {
-                dialog
-                    .file()
-                    .and_then(|f| f.path())
-                    .map(|p| p.to_string_lossy().to_string())
-            } else {
-                None
-            };
-            match filename {
-                Some(f) => f,
-                None => {
-                    println!("No file selected, exiting...");
-                    std::process::exit(1);
+fn get_texture_from_clipboard(cb: &gdk::Clipboard) -> Result<gdk::Texture> {
+    gtk::glib::MainContext::default().block_on(async {
+        let res = cb.read_texture_future().await;
+        let texture = match res {
+            Ok(Some(x)) => Ok(x),
+            Ok(None) => {
+                g_warning!("showimg (read_texture)", "Clipboard does not contain an image");
+                Err(anyhow::anyhow!("Clipboard does not contain an image"))
+            }
+            Err(e) => {
+                g_warning!("showimg (read_texture)", "Failed to read clipboard: {}", e);
+                Err(anyhow::anyhow!("Failed to read clipboard: {}", e))
+            }
+        };
+        if let Ok(texture) = texture {
+            return Ok(texture);
+        }
+        // Try to get a path from clipboard
+        let res = cb.read_text_future().await;
+        match res {
+            Ok(Some(path)) => {
+                let file = File::for_path(path);
+                match gdk::Texture::from_file(&file) {
+                    Ok(t) => Ok(t),
+                    Err(e) => {
+                        g_warning!("showimg (from_file)", "Failed to load image from clipboard path: {}", e);
+                        Err(anyhow::anyhow!("Failed to load image from clipboard path: {}", e))
+                    }
                 }
             }
-        }),
-        Some(filename) => filename.to_string(),
-    };
+            Ok(None) => {
+                g_warning!("showimg (from_file)", "Clipboard does not contain a path");
+                Err(anyhow::anyhow!("Clipboard does not contain a path"))
+            }
+            Err(e) => {
+                g_warning!("showimg (from_file)", "Failed to read clipboard path: {}", e);
+                Err(anyhow::anyhow!("Failed to read clipboard path: {}", e))
+            }
+        }
+    })
+}
+
+fn build_ui(app: &Application, args: &Args) {
+    let window = window::Window::new(app, "Show Img", args.clone());
+
     if args.quit_with != "none" {
         app.set_accels_for_action("window.close", &[&args.quit_with]);
     }
 
+    let texture = if args.clipboard != UseClipboard::No {
+        // Wayland requires a focused (active) window to access clipboard
+        let empty_window = gtk::Window::new();
+        empty_window.set_default_size(0, 0);
+        empty_window.set_opacity(0.01);
+        empty_window.set_decorated(false);
+        let texture = Rc::new(RefCell::new(None));
+        let clipboard_type = args.clipboard;
+
+        let texture_1 = texture.clone();
+        empty_window.connect_is_active_notify(move |_| {
+            let display = gdk::Display::default().expect("Error initializing gdk default display");
+            let cb = match clipboard_type {
+                UseClipboard::Primary => display.primary_clipboard(),
+                UseClipboard::Yes => display.clipboard(),
+                _ => unreachable!("Invalid clipboard value"),
+            };
+            let t = get_texture_from_clipboard(&cb);
+            *texture_1.borrow_mut() = Some(t);
+        });
+        empty_window.present();
+        while !empty_window.is_active() {
+            while gtk::glib::MainContext::default().iteration(false) {}
+        }
+        empty_window.close();
+        texture.take().unwrap()
+    } else {
+        let filename = match &args.file {
+            None => gtk::glib::MainContext::default().block_on(async {
+                let dialog = FileChooserNative::builder()
+                    .title("Open Image")
+                    .action(gtk::FileChooserAction::Open)
+                    .modal(true)
+                    .transient_for(&window)
+                    .build();
+                let filename = if dialog.run_future().await == gtk::ResponseType::Accept {
+                    dialog
+                        .file()
+                        .and_then(|f| f.path())
+                        .map(|p| p.to_string_lossy().to_string())
+                } else {
+                    None
+                };
+                match filename {
+                    Some(f) => f,
+                    None => {
+                        println!("No file selected, exiting...");
+                        std::process::exit(1);
+                    }
+                }
+            }),
+            Some(filename) => filename.to_string(),
+        };
+        gdk::Texture::from_file(&File::for_path(filename)).map_err(|e| anyhow::anyhow!(e))
+    };
+
     // Image
-    let texture = match gdk::Texture::from_file(&File::for_path(filename)) {
+    let texture = match texture {
         Ok(t) => t,
         Err(e) => {
             message_dialog("Failed to load image", &e.to_string(), &window);

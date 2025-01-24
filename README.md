@@ -44,26 +44,46 @@ flatpak-builder --install repo build-aux/moe.taoky.showimg.yaml --force-clean --
 
 ```console
 $ ./showimg --help
-showimg-gtk 0.2.0
+showimg-gtk 0.2.1
 Show a picture without window decoration in Linux desktop
 
 USAGE:
     showimg-gtk [OPTIONS] [FILE]
 
 ARGS:
-    <FILE>    The image file to open. Empty value would open a file chooser dialog
+    <FILE>
+            The image file to open. Empty value would open a file chooser dialog.
+            
+            Supports PNG, JPEG and TIFF.
 
 OPTIONS:
-    -h, --help                     Print help information
-    -m, --mouse <MOUSE>            Controls how window reacts to mouse events [default: none]
-                                   [possible values: none, drag, passthrough]
-        --no-context-menu          Disable right-click context menu
-        --no-maximize              Disable double-click to maximize
-    -q, --quit-with <QUIT_WITH>    The accelerator to quit the application, "none" to disable.
-                                   Syntax:
-                                   https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/fn.accelerator_parse.html
-                                   [default: q]
-    -V, --version                  Print version information
+        --clipboard <CLIPBOARD>
+            [default: no]
+            [possible values: no, primary, yes]
+
+    -h, --help
+            Print help information
+
+    -m, --mouse <MOUSE>
+            Controls how window reacts to mouse events
+            
+            [default: drag]
+            [possible values: none, drag, passthrough]
+
+        --no-context-menu
+            Disable right-click context menu
+
+        --no-maximize
+            Disable double-click to maximize
+
+    -q, --quit-with <QUIT_WITH>
+            The accelerator to quit the application, "none" to disable. Syntax:
+            https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/fn.accelerator_parse.html
+            
+            [default: q]
+
+    -V, --version
+            Print version information
 ```
 
 Picture will be shown with their natural size. You could resize the window manually.

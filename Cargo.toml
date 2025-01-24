@@ -1,6 +1,6 @@
 [package]
 name = "showimg-gtk"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 description = "Show a picture without window decoration in Linux desktop"
 exclude = ["assets/*", "build-aux/*", ".github/*", "libs/*", "repo/*", ".flatpak-builder/*"]
@@ -14,4 +14,5 @@ repository = "https://github.com/taoky/showimg"
 
 [dependencies]
 clap = { version = "3.2.20", features = ["derive"] }
-gtk = { version = "0.9.5", package = "gtk4", features = ["v4_4"] }
+gtk = { version = "0.9.5", package = "gtk4" }
+anyhow = "1.0.95"
