@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Show Image
+Exec=showimg %U
+Type=Application
+Icon=moe.taoky.showimg
+Categories=Graphics;Viewer;

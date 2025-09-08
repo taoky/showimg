@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <title>Image Viewer - GNOME style</title>
+  <desc>Colorful GNOME-style app icon showing a photo and a mouse cursor.</desc>
+
+  <defs>
+    <!-- Background tile gradient -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#62a0ea"/>
+      <stop offset="100%" stop-color="#1c71d8"/>
+    </linearGradient>
+
+    <!-- Soft highlight on tile -->
+    <radialGradient id="bgHighlight" cx="0.25" cy="0.15" r="0.9">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Card (photo) drop shadow -->
+    <filter id="shadow-card" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+
+    <!-- Cursor drop shadow -->
+    <filter id="shadow-cursor" x="-40%" y="-40%" width="180%" height="180%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="1.6" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+
+    <!-- Sky/mountains -->
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#99c1f1"/>
+      <stop offset="100%" stop-color="#62a0ea"/>
+    </linearGradient>
+
+    <linearGradient id="mount1Grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8ff0a4"/>
+      <stop offset="100%" stop-color="#2ec27e"/>
+    </linearGradient>
+
+    <linearGradient id="mount2Grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#57e389"/>
+      <stop offset="100%" stop-color="#26a269"/>
+    </linearGradient>
+
+    <!-- Clip for the photo content area -->
+    <clipPath id="clip-card">
+      <rect x="32" y="34" width="64" height="44" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Rounded app tile -->
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="url(#bgGrad)"/>
+  <rect x="8" y="8" width="112" height="112" rx="24" fill="url(#bgHighlight)" opacity="0.65"/>
+
+  <!-- Photo card -->
+  <g filter="url(#shadow-card)">
+    <rect x="26" y="28" width="76" height="56" rx="10" fill="#ffffff"/>
+    <rect x="26.5" y="28.5" width="75" height="55" rx="9.5" fill="none" stroke="#dfe6f3" stroke-width="1"/>
+    <g clip-path="url(#clip-card)">
+      <!-- Sky -->
+      <rect x="32" y="34" width="64" height="44" fill="url(#skyGrad)"/>
+      <!-- Sun -->
+      <circle cx="84" cy="42" r="6.5" fill="#f5c211"/>
+      <circle cx="84" cy="42" r="6.5" fill="#ffffff" opacity="0.2"/>
+      <!-- Mountains -->
+      <polygon points="32,76 49,48 66,78" fill="url(#mount1Grad)"/>
+      <polygon points="54,76 70,56 96,78" fill="url(#mount2Grad)"/>
+      <!-- Subtle ground haze -->
+      <rect x="32" y="70" width="64" height="8" fill="#2ec27e" opacity="0.18"/>
+    </g>
+  </g>
+
+  <!-- Cursor -->
+  <g filter="url(#shadow-cursor)" transform="translate(70,48) scale(1.55)">
+    <!-- White arrow with black outline (GNOME-like) -->
+    <path d="M0,0 L0,36 L8,28 L14,44 L20,41 L14,26 L28,26 Z"
+          fill="#ffffff" stroke="#000000" stroke-width="2.6"
+          stroke-linejoin="round" stroke-linecap="round"
+          vector-effect="non-scaling-stroke"/>
+  </g>
+</svg>

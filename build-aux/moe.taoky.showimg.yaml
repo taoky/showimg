@@ -28,3 +28,13 @@ modules:
     sources:
       - type: dir
         path: ../
+  - name: misc
+    buildsystem: simple
+    build-commands:
+      - install -D -t /app/share/applications/ moe.taoky.showimg.desktop
+      - install -D -t /app/share/icons/hicolor/scalable/apps/ moe.taoky.showimg.svg
+    sources:
+      - type: file
+        path: moe.taoky.showimg.desktop
+      - type: file
+        path: moe.taoky.showimg.svg
